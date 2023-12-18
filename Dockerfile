@@ -3,9 +3,9 @@ FROM continuumio/miniconda3:latest
 
 # adds metadata to an image
 LABEL MAINTAINER="Flavio Montesano"
-LABEL GitHub="https://github.com/bpostance/deng.learn/tree/master/docker"
-LABEL version="0.0"
-LABEL description="A Docker container to serve a simple Python Flask API"
+LABEL GitHub="https://github.com/silver085/elerobackend"
+LABEL version="0.1"
+LABEL description="A Docker container to serve elero backend Python Flask API"
 
 ## Override the default shell (not supported on older docker, prepend /bin/bash -c )
 SHELL ["/bin/bash", "-c"]
