@@ -29,6 +29,7 @@ class RadioService:
             raise RuntimeError("Radio not initialised.")
 
     def loop_radio(self):
+        print("Radio initialized.")
         while True:
             data = self.radio.checkBuffer()
             if data:
