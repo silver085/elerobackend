@@ -4,6 +4,6 @@ pydantic==2.5.2
 pyeasyencrypt==0.1.0
 python_jose==3.3.0
 SQLAlchemy==2.0.23
-starlette==0.34.0
+starlette==0.27.0
 uvicorn==0.24.0.post1
 validator==0.7.1
