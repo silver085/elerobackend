@@ -30,6 +30,10 @@ class RadioService:
         else:
             raise RuntimeError("Radio not initialised.")
 
+    def stop_looping(self):
+        if self.radio_task:
+            self.radio_task.join()
+
     def loop_radio(self):
         print("Radio initialized.")
         while True:
@@ -37,8 +41,10 @@ class RadioService:
             if data:
 
                 try:
-                    (length, cnt, typ, chl, src, bwd, fwd, dests, payload, rssi, lqi, crc) = self.elero.interpretMsg(data)
-                    print(f"RP-> len: {length} cnt: {cnt} typ: {typ} chl: {chl} src: {src} bwd: {bwd} fwd: {fwd} dests: {dests} payload: {payload} rssi: {rssi} lqi: {lqi} crc: {crc}")
+                    (length, cnt, typ, chl, src, bwd, fwd, dests, payload, rssi, lqi, crc) = self.elero.interpretMsg(
+                        data)
+                    print(
+                        f"RP-> len: {length} cnt: {cnt} typ: {typ} chl: {chl} src: {src} bwd: {bwd} fwd: {fwd} dests: {dests} payload: {payload} rssi: {rssi} lqi: {lqi} crc: {crc}")
 
                 except Exception as e:
                     print(f"Exception during radio message decode: {e}")

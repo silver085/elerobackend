@@ -20,7 +20,11 @@ config_repo = ConfigRepository(db_service=db_service)
 config_controller = ConfigController(db_service=db_service, config_repo=config_repo, user_controller=user_controller, app=app)
 
 radio_service = RadioService(config_controller=config_controller)
-radio_service.start_looping()
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+try:
+    radio_service.start_looping()
+    if __name__ == "__main__":
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+finally:
+    radio_service.stop_looping()
+    print("Stopped radio.")
