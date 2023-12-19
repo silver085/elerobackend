@@ -129,7 +129,7 @@ class CC1101:
             if (bytes_in_fifo >= 30):
                 data = self.readBuf(0xFF, bytes_in_fifo + 1)
 
-            print(time.time(), ''.join('{:02X}:'.format(a) for a in data))
+            #print(time.time(), ''.join('{:02X}:'.format(a) for a in data))
             self.writeCmd(0x36)
             self.writeCmd(0x3A)
             self.writeCmd(0x3B)
