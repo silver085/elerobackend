@@ -6,6 +6,8 @@ from drivers.eleroProtocol import EleroProtocol
 from models.config import Config
 import threading
 
+from utils.printutils import hex_int_to_str, hex_array_to_str, hex_n_array_to_str
+
 
 class RadioService:
     configuration: Config
@@ -44,8 +46,9 @@ class RadioService:
                     (length, cnt, typ, chl, src, bwd, fwd, dests, payload, rssi, lqi, crc) = self.elero.interpretMsg(
                         data)
                     print(
-                        f"RP-> len: {length} cnt: {cnt} typ: {typ} chl: {chl} src: {src} bwd: {bwd} fwd: {fwd} dests: {dests} payload: {payload} rssi: {rssi} lqi: {lqi} crc: {crc}")
+                        f"RP-> len: {length} cnt: {cnt} typ: {hex_int_to_str(typ)} chl: {hex_int_to_str(chl)} src: {hex_array_to_str(src)} bwd: {hex_array_to_str(bwd)} fwd: {hex_array_to_str(fwd)} dests: {hex_n_array_to_str(dests)} payload: {hex_array_to_str(payload)} rssi: {rssi} lqi: {lqi} crc: {crc}")
 
                 except Exception as e:
                     print(f"Exception during radio message decode: {e}")
             time.sleep(0.005)
+
