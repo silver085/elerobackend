@@ -1,11 +1,11 @@
-from pyeasyencrypt.pyeasyencrypt import encrypt_string, decrypt_string
-
-ENC_SALT = "TestSalt"
+import hashlib
+ENC_SALT = b'TestSalt'
 
 
 def encrypt(clear_message, salt):
-    return encrypt_string(clear_string=clear_message, password=salt)
+    hash_object = hashlib.sha256()
+    hash_object.update(salt + clear_message.encode())
+    hash_password = hash_object.hexdigest()
+    return hash_password
 
 
-def decrypt(hashed_pass, salt):
-    return decrypt_string(encrypted_string=hashed_pass, password=salt)

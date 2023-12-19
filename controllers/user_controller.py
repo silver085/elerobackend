@@ -9,7 +9,7 @@ from starlette.responses import JSONResponse
 
 from custom_validators.user_validators import validate_user_create
 from models.user import User, PassData
-from utils.encryption import encrypt, ENC_SALT, decrypt
+from utils.encryption import encrypt, ENC_SALT
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
@@ -80,8 +80,8 @@ class UserController:
             )
 
     def verify_password(self, clear_password, hashed_password):
-        dec_password = decrypt(hashed_pass=hashed_password, salt=ENC_SALT)
-        return clear_password == dec_password
+        enc_password = encrypt(clear_password, ENC_SALT)
+        return enc_password == hashed_password
 
     def authenticate_user(self, username: str, password: str):
         user = self.user_repo.get_user_record(email=username)
@@ -189,10 +189,9 @@ class UserController:
     async def update_password(self, pass_data: PassData, WWW_Authenticate: Union[str, None] = Header(default=None)):
         user = self.get_current_user(token=WWW_Authenticate)
 
-        old_pass = decrypt(user.password, ENC_SALT)
-        if pass_data.old_password == old_pass:
+        if self.verify_password(pass_data.old_password, user.password):
             if pass_data.password == pass_data.repeat_password:
-                self.user_repo.update_password(id=user.id, password = encrypt(pass_data.password, ENC_SALT))
+                self.user_repo.update_password(id=user.id, password=encrypt(pass_data.password, ENC_SALT))
                 return JSONResponse(
                     status_code=status.HTTP_200_OK,
                     content=jsonable_encoder({"result": "Success"})
