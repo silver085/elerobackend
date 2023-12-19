@@ -20,11 +20,11 @@ class RadioService:
             gdo0=self.configuration.gdo0,
             gdo2=self.configuration.gdo2
         )
-        self.radio_task = None
+        self.radio_task = threading.Thread(target=self.loop_radio)
 
     def start_looping(self):
         if self.radio:
-            self.radio_task = threading.Thread(target=self.loop_radio)
+            self.radio_task.start()
         else:
             raise RuntimeError("Radio not initialised.")
 
