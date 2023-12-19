@@ -2,6 +2,7 @@ import time
 
 from controllers.config_controller import ConfigController
 from drivers.cc1101 import CC1101
+from drivers.eleroProtocol import EleroProtocol
 from models.config import Config
 import threading
 
@@ -21,6 +22,7 @@ class RadioService:
             gdo2=self.configuration.gdo2
         )
         self.radio_task = threading.Thread(target=self.loop_radio)
+        self.elero = EleroProtocol()
 
     def start_looping(self):
         if self.radio:
@@ -33,6 +35,11 @@ class RadioService:
         while True:
             data = self.radio.checkBuffer()
             if data:
-                print(f"Radio data debug: {data}")
 
+                try:
+                    (length, cnt, typ, chl, src, bwd, fwd, dests, payload, rssi, lqi, crc) = self.elero.interpretMsg(data)
+                    print(f"RP-> len: {length} cnt: {cnt} typ: {typ} chl: {chl} src: {src} bwd: {bwd} fwd: {fwd} dests: {dests} payload: {payload} rssi: {rssi} lqi: {lqi} crc: {crc}")
+
+                except Exception as e:
+                    print(f"Exception during radio message decode: {e}")
             time.sleep(0.005)
