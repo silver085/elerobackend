@@ -25,6 +25,10 @@ class BlindsRepository:
         )
         self.table.create(db_service.connection, checkfirst=True)
 
+    def get_blinds(self):
+        statement = self.table.select()
+        return self.db_service.execute_statement(statement)
+
     def find_blind_by_id(self, blind_id):
         statement = self.table.select().where(self.table.c.id == blind_id)
         return self.db_service.execute_statement(statement).first()

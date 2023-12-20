@@ -1,3 +1,6 @@
+from drivers.MessageCounterTable import MessageCounterTable
+
+
 class EleroProtocol:
     flash_table_encode = [0x08, 0x02, 0x0d, 0x01, 0x0f, 0x0e, 0x07, 0x05, 0x09, 0x0c, 0x00, 0x0a, 0x03, 0x04, 0x0b,
                           0x06]
@@ -41,8 +44,10 @@ class EleroProtocol:
         "On",
     ]
 
+    message_table: MessageCounterTable
+
     def __init__(self):
-        self.gIndex = {}  # create a counter for each defined remote
+        self.message_table = MessageCounterTable()
 
     # translate nibbles using flash_table_decode
     def decode_nibbles(self, msg):
@@ -250,14 +255,9 @@ class EleroProtocol:
                 msg.append(0x00)
                 msg.append(0x04)  # not sure about this
 
-        if (command != "P2"):
+        if command != "P2":
             code = (0x00 - (index * 0x708F)) & 0xFFFF
-            payload = []
-            payload.append((code >> 8) & 0xFF)
-            payload.append(code & 0xFF)
-            payload.append(self.eleroCmds[command][1])  # actual command
-            payload.append(self.eleroCmds[command][2])
-            payload.append(0)
+            payload = [(code >> 8) & 0xFF, code & 0xFF, self.eleroCmds[command][1], self.eleroCmds[command][2], 0]
             if (command == 'P1') or (command == 'P3'):
                 payload.append(2)
             else:
@@ -266,15 +266,15 @@ class EleroProtocol:
             payload.append(0)
             self.encode_msg(payload);
 
-        return (msg + payload)
+        return msg + payload
 
-    def construct_msg(self, remote_addr, blind_addr, command):
+    def construct_msg(self,channel, remote_addr:list, blind_addr:list, command):
+        blind_addr.append(channel)
+        counter = self.message_table.get_counter(remote_id=remote_addr)
+        return self.generate_msg(remote_addr, counter, blind_addr, command)
+        # self.gIndex[rIndex] = (self.gIndex[rIndex] + 1) & 0xFF
 
-        rIndex = ''.join('{:02X}'.format(a) for a in remote_addr)
-        msg = self.generate_msg(remote_addr, self.gIndex[rIndex], blind_addr, command)
-        self.gIndex[rIndex] = (self.gIndex[rIndex] + 1) & 0xFF
 
-        return (msg)
 
     # for most commands we'll use the first remote which "knows" the blind
-    # but for programming we want the last - so we can "learn" an existing blind on a new software remote    
+    # but for programming we want the last - so we can "learn" an existing blind on a new software remote

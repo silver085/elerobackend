@@ -98,3 +98,6 @@ class BlindController:
             f"Blind status update: chl: {hex_int_to_str(channel)} - src: {hex_array_to_str(source)} - dests: {hex_n_array_to_str(destinations)} - rssi: {rssi} - state: {blind_state}")
 
         self.blind_repo.set_status_by_blind_id(blind_id=hex_array_to_str(source), channel=hex_int_to_str(channel), rssi=rssi, state= blind_state.upper())
+
+    def get_all_blinds(self):
+        return self.blind_repo.get_blinds()

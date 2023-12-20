@@ -12,7 +12,7 @@ class CC1101:
 
     def __init__(self, spibus, spics, speed, gdo0, gdo2):
         self.is_initialised = False
-        if (os.uname()[0] == 'esp32'):
+        if os.uname()[0] == 'esp32':
             pass
         elif os.uname()[0] == "Darwin":
             print("Debugging only!")
@@ -93,7 +93,10 @@ class CC1101:
         self.is_initialised = True
 
     def transmit(self, msg):
-
+        if not self.is_initialised:
+            d_msg = " ".join(list(map(lambda x: str(hex(x)), msg)))
+            print(f"Debug transmit: {d_msg}")
+            return
         self.writeCmd(0x36)
         self.writeCmd(0x3A)
         self.writeCmd(0x3B)
