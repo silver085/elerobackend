@@ -21,6 +21,7 @@ class BlindsRepository:
             Column('is_in_discovery', Boolean, default=0),
             Column('discovery_stop', Integer, default=0),
             Column('last_stop_date', DateTime),
+            Column('last_ping', DateTime)
         )
         self.table.create(db_service.connection, checkfirst=True)
 
@@ -65,8 +66,8 @@ class BlindsRepository:
 
     def update_stop_count(self, blind_id: str, count: int):
         statement = self.table.update().values(
-            discovery_stop = count,
-            last_stop_date = datetime.utcnow()
+            discovery_stop=count,
+            last_stop_date=datetime.utcnow()
         ).where(self.table.c.id == blind_id)
         self.db_service.execute_update(statement)
 
@@ -77,5 +78,14 @@ class BlindsRepository:
             online=True,
             is_in_discovery=False,
             state=BlindStates.STATE_STOPPED
+        ).where(self.table.c.id == blind_id)
+        self.db_service.execute_update(statement)
+
+    def set_status_by_blind_id(self, blind_id: str, channel: str, rssi: int, state: str):
+        statement = self.table.update().values(
+            channel=channel,
+            rssi=rssi,
+            state=state,
+            last_ping=datetime.utcnow()
         ).where(self.table.c.id == blind_id)
         self.db_service.execute_update(statement)

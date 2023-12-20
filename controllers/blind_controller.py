@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 
 from models.blind import Blind, BlindStates
 from repositories.blind_repo import BlindsRepository
-from utils.printutils import hex_array_to_str, hex_int_to_str
+from utils.printutils import hex_array_to_str, hex_int_to_str, hex_n_array_to_str
 
 
 class BlindController:
@@ -95,4 +95,6 @@ class BlindController:
 
     def on_status_update_listener(self, channel, source, destinations, rssi, blind_state):
         print(
-            f"Blind status update: chl: {channel} - src: {source} - dests: {destinations} - rssi: {rssi} - state: {blind_state}")
+            f"Blind status update: chl: {hex_int_to_str(channel)} - src: {hex_array_to_str(source)} - dests: {hex_n_array_to_str(destinations)} - rssi: {rssi} - state: {blind_state}")
+
+        self.blind_repo.set_status_by_blind_id(blind_id=hex_array_to_str(source), channel=hex_int_to_str(channel), rssi=rssi, state= blind_state.upper())
