@@ -93,6 +93,7 @@ class CC1101:
         self.is_initialised = True
 
     def transmit(self, msg):
+        time.sleep(0.010)
         if not self.is_initialised:
             d_msg = " ".join(list(map(lambda x: str(hex(x)), msg)))
             print(f"Debug transmit: {d_msg}")
