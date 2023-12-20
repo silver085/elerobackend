@@ -50,6 +50,13 @@ class BlindController:
 
         else:
             blind_from_db: Blind = self.blind_repo.find_blind_by_id(blind_id=blind.id)
+            if not blind_from_db.is_in_discovery:
+                print(f"Blind {blind_from_db.id} is already configured.")
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content=jsonable_encoder({"blind_id": blind.id, "ready": True}),
+                )
+
             if blind_from_db.discovery_stop < 10:
                 self.blind_repo.update_stop_count(blind_id=blind_from_db.id, count=blind_from_db.discovery_stop + 1)
                 print(f"Blind id: {blind.id} - stopcount: {blind_from_db.discovery_stop + 1}")
