@@ -26,7 +26,7 @@ class RadioService:
         self.radio_task = threading.Thread(target=self.loop_radio)
         self.elero = EleroProtocol()
         self.on_stop_button_cb = None
-
+        self.on_status_update_cb = None
     def start_looping(self):
         if self.radio:
             self.radio_task.start()
@@ -46,12 +46,20 @@ class RadioService:
                 try:
                     (length, cnt, typ, chl, src, bwd, fwd, dests, payload, rssi, lqi, crc) = self.elero.interpretMsg(
                         data)
+                    if length <=0:
+                        print("Data decode failed, skipping.")
+                        raise Exception("Data decode failed, length not consistent.")
                     print(
                         f"RP-> len: {length} cnt: {cnt} typ: {hex_int_to_str(typ)} chl: {hex_int_to_str(chl)} src: {hex_array_to_str(src)} bwd: {hex_array_to_str(bwd)} fwd: {hex_array_to_str(fwd)} dests: {hex_n_array_to_str(dests)} payload: {hex_array_to_str(payload)} rssi: {rssi} lqi: {lqi} crc: {crc}")
 
                     if typ == 0x6a: # STOP BUTTON PRESSED
                         if self.on_stop_button_cb:
                             self.on_stop_button_cb(channel=chl, source=src, destinations=dests)
+
+                    if typ == 0xCA: #status received
+                        if self.on_status_update_cb:
+                            blind_state = self.elero.eleroState[payload[6]]
+                            self.on_status_update_cb(channel=chl, source=src, destinations=dests, rssi=rssi, blind_state = blind_state)
 
                 except Exception as e:
                     print(f"Exception during radio message decode: {e}")

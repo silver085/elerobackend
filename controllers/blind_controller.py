@@ -92,3 +92,7 @@ class BlindController:
                 self.add_blind_in_discovery(blind=blind)
         else:
             print("Discard, not in discovery.")
+
+    def on_status_update_listener(self, channel, source, destinations, rssi, blind_state):
+        print(
+            f"Blind status update: chl: {channel} - src: {source} - dests: {destinations} - rssi: {rssi} - state: {blind_state}")
