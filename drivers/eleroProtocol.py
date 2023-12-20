@@ -44,10 +44,9 @@ class EleroProtocol:
         "On",
     ]
 
-    message_table: MessageCounterTable
-
     def __init__(self):
-        self.message_table = MessageCounterTable()
+        self.gIndex = {}  # create a counter for each defined remote
+
 
     # translate nibbles using flash_table_decode
     def decode_nibbles(self, msg):
@@ -270,9 +269,18 @@ class EleroProtocol:
 
     def construct_msg(self,channel, remote_addr:list, blind_addr:list, command):
         blind_addr.append(channel)
-        counter = self.message_table.get_counter(remote_id=remote_addr)
-        return self.generate_msg(remote_addr, counter, blind_addr, command)
-        # self.gIndex[rIndex] = (self.gIndex[rIndex] + 1) & 0xFF
+        rIndex = ''.join('{:02X}'.format(a) for a in remote_addr)
+
+        try:
+            counter = self.gIndex[rIndex]
+        except Exception:
+            self.gIndex[rIndex] = 1
+            counter = self.gIndex[rIndex]
+
+        msg = self.generate_msg(remote_addr, counter, blind_addr, command)
+        self.gIndex[rIndex] = (self.gIndex[rIndex] + 1) & 0xFF
+
+        return (msg)
 
 
 
