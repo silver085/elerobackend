@@ -25,6 +25,7 @@ class RadioService:
         )
         self.radio_task = threading.Thread(target=self.loop_radio)
         self.elero = EleroProtocol()
+        self.on_stop_button_cb = None
 
     def start_looping(self):
         if self.radio:
@@ -47,6 +48,10 @@ class RadioService:
                         data)
                     print(
                         f"RP-> len: {length} cnt: {cnt} typ: {hex_int_to_str(typ)} chl: {hex_int_to_str(chl)} src: {hex_array_to_str(src)} bwd: {hex_array_to_str(bwd)} fwd: {hex_array_to_str(fwd)} dests: {hex_n_array_to_str(dests)} payload: {hex_array_to_str(payload)} rssi: {rssi} lqi: {lqi} crc: {crc}")
+
+                    if typ == 0x6a: # STOP BUTTON PRESSED
+                        if self.on_stop_button_cb:
+                            self.on_stop_button_cb(channel=chl, source=src, destinations=dests)
 
                 except Exception as e:
                     print(f"Exception during radio message decode: {e}")

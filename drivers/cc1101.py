@@ -5,16 +5,15 @@ import time
 import os
 
 
-
 class CC1101:
 
     def gdo2Int(self, Pin):
         self.pktRec = True
 
     def __init__(self, spibus, spics, speed, gdo0, gdo2):
-
+        self.is_initialised = False
         if (os.uname()[0] == 'esp32'):
-           pass
+            pass
         elif os.uname()[0] == "Darwin":
             print("Debugging only!")
             return
@@ -91,6 +90,7 @@ class CC1101:
             time.sleep(0.0001)
             print(".", end='')
         print("channel cleared");
+        self.is_initialised = True
 
     def transmit(self, msg):
 
@@ -118,6 +118,7 @@ class CC1101:
         print("sent: ", ''.join('{:02X}:'.format(a) for a in msg), self.readReg(0xF5))
 
     def checkBuffer(self):
+        if not self.is_initialised: return None
         data = None
         if (self.pktRec):
             time.sleep(0.00002)
@@ -129,7 +130,7 @@ class CC1101:
             if (bytes_in_fifo >= 30):
                 data = self.readBuf(0xFF, bytes_in_fifo + 1)
 
-            #print(time.time(), ''.join('{:02X}:'.format(a) for a in data))
+            # print(time.time(), ''.join('{:02X}:'.format(a) for a in data))
             self.writeCmd(0x36)
             self.writeCmd(0x3A)
             self.writeCmd(0x3B)
