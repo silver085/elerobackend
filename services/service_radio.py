@@ -40,7 +40,7 @@ class RadioService:
     def send_check_signal(self, remote_id, blind_id, channel):
         message = self.elero.construct_msg(channel=deserialize_str_to_int(channel),
                                            remote_addr=deserialize_str_to_list(remote_id),
-                                           blind_addr=deserialize_str_to_list(blind_id), command="Down")
+                                           blind_addr=deserialize_str_to_list(blind_id), command="Stop")
         self.transmit_with_config(message)
 
     def start_looping(self):
@@ -57,8 +57,9 @@ class RadioService:
         print("Radio initialized.")
         while True:
             data = self.radio.checkBuffer()
-            if data:
 
+            if data:
+                print("RP: " + ''.join('{:02X}:'.format(a) for a in data))
                 try:
                     (length, cnt, typ, chl, src, bwd, fwd, dests, payload, rssi, lqi, crc) = self.elero.interpretMsg(
                         data)
