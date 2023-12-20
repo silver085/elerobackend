@@ -25,8 +25,9 @@ class BlindsCheckerSchedule:
             self.thread.start()
 
     def scheduled_task(self):
-        print("Sending check signal...")
+        print("Check blind task")
         blinds_rows = self.blind_controller.get_all_blinds()
         for blind in blinds_rows:
-            print(f"Checking blind {blind.id}")
-            self.radio_service.send_check_signal(channel=blind.channel, remote_id=blind.remote_id, blind_id=blind.id)
+            if not blind.is_in_discovery:
+                print(f"Checking blind {blind.id}")
+                self.radio_service.send_check_signal(channel=blind.channel, remote_id=blind.remote_id, blind_id=blind.id)

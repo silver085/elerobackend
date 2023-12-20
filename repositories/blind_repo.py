@@ -87,7 +87,6 @@ class BlindsRepository:
 
     def set_status_by_blind_id(self, blind_id: str, channel: str, rssi: int, state: str):
         statement = self.table.update().values(
-            channel=channel,
             rssi=rssi,
             state=state,
             last_ping=datetime.utcnow()
