@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
 
-from models.blind import Blind
+from models.blind import Blind, BlindStates
 from repositories.blind_repo import BlindsRepository
 from utils.printutils import hex_array_to_str, hex_int_to_str
 
@@ -83,7 +83,7 @@ class BlindController:
                 blind.name = f"Elero Blind {hex_array_to_str(destination)}"
                 blind.remote_id = hex_array_to_str(source)
                 blind.channel = hex_int_to_str(channel)
-                blind.state = "DISCOVERY"
+                blind.state = BlindStates.STATE_DISCOVERY
                 blind.online = True
                 blind.date_added = datetime.utcnow()
                 blind.is_in_discovery = True

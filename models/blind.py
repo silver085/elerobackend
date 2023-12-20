@@ -17,3 +17,8 @@ class Blind(BaseModel):
     discovery_stop: int = Field(0)
     last_stop_date: datetime = Field(None)
 
+
+class BlindStates:
+    STATE_STOPPED = "STOPPED"
+    STATE_MOVING = "MOVING"
+    STATE_DISCOVERY = "IN_DISCOVERY"

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Table, Column, Integer, String, DateTime, Boolean
 
-from models.blind import Blind
+from models.blind import Blind, BlindStates
 
 
 class BlindsRepository:
@@ -75,6 +75,7 @@ class BlindsRepository:
             discovery_stop=0,
             last_stop_date=datetime.utcnow(),
             online=True,
-            is_in_discovery=False
+            is_in_discovery=False,
+            state=BlindStates.STATE_STOPPED
         ).where(self.table.c.id == blind_id)
         self.db_service.execute_update(statement)
