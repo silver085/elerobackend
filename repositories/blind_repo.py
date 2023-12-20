@@ -87,5 +87,5 @@ class BlindsRepository:
             rssi=rssi,
             state=state,
             last_ping=datetime.utcnow()
-        ).where(self.table.c.id == blind_id)
+        ).where((self.table.c.id == blind_id) & (self.table.c.is_in_discovery == 0))
         self.db_service.execute_update(statement)
