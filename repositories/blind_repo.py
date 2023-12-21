@@ -89,7 +89,8 @@ class BlindsRepository:
         statement = self.table.update().values(
             rssi=rssi,
             state=state,
-            last_ping=datetime.utcnow()
+            last_ping=datetime.utcnow(),
+            online=True
         ).where((self.table.c.id == blind_id) & (self.table.c.is_in_discovery == 0))
         self.db_service.execute_update(statement)
 
