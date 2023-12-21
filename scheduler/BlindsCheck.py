@@ -13,6 +13,7 @@ class BlindsCheckerSchedule:
         last_blind_ping = blind.last_ping
         if last_blind_ping is None: last_blind_ping = blind.date_added
         diff = datetime.now() - last_blind_ping
+        print(f"Difference is {diff.seconds}")
         if diff.seconds > 1800:
             # blind is probably offline
             self.blind_controller.put_blind_offline(blind_id=blind.id)
