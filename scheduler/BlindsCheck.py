@@ -11,7 +11,7 @@ class BlindsCheckerSchedule:
 
     def check_blind_offline(self, blind: Blind):
         last_blind_ping = blind.last_ping
-        if last_blind_ping is None: return
+        if last_blind_ping is None: last_blind_ping = blind.date_added
         diff = datetime.now() - last_blind_ping
         if diff.seconds > 1800:
             # blind is probably offline
