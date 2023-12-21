@@ -18,10 +18,16 @@ class DBService:
         return self.connection.execute(statement)
 
     def execute_insert(self, statement):
-        result = self.connection.execute(statement=statement)
-        self.connection.commit()
-        return result.inserted_primary_key
+        try:
+            result = self.connection.execute(statement=statement)
+            self.connection.commit()
+            return result.inserted_primary_key
+        except RuntimeError as e:
+            print(f"Error during execute_insert: {e}")
 
     def execute_update(self, statement):
-        result = self.connection.execute(statement=statement)
-        self.connection.commit()
+        try:
+            result = self.connection.execute(statement=statement)
+            self.connection.commit()
+        except RuntimeError as e:
+            print(f"Error during execute_insert: {e}")
