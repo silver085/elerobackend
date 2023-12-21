@@ -101,3 +101,6 @@ class BlindController:
 
     def get_all_blinds(self):
         return self.blind_repo.get_blinds()
+
+    def put_blind_offline(self, blind_id):
+        self.blind_repo.set_blind_offline(blind_id=blind_id)

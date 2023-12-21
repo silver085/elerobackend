@@ -16,6 +16,7 @@ class Blind(BaseModel):
     is_in_discovery: bool = Field(False)
     discovery_stop: int = Field(0)
     last_stop_date: datetime = Field(None)
+    last_ping: datetime = Field(None)
 
 
 class BlindStates:

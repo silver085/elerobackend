@@ -25,10 +25,13 @@ class DBService:
             return result.inserted_primary_key
         except RuntimeError as e:
             print(f"Error during execute_insert: {e}")
+            return None
 
     def execute_update(self, statement):
         try:
             result = self.session.execute(statement=statement)
             self.session.commit()
+            return True
         except RuntimeError as e:
             print(f"Error during execute_insert: {e}")
+            return False
