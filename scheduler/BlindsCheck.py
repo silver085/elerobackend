@@ -11,9 +11,10 @@ class BlindsCheckerSchedule:
 
     def check_blind_offline(self, blind: Blind):
         last_blind_ping = blind.last_ping
+        if last_blind_ping is None: return
         diff = datetime.now() - last_blind_ping
         if diff.seconds > 1800:
-            #blind is probably offline
+            # blind is probably offline
             self.blind_controller.put_blind_offline(blind_id=blind.id)
             print(f"Blind {blind.id} didn't respond to ping for more than 30 min, putting offline.")
 
