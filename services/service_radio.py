@@ -33,13 +33,8 @@ class RadioService:
         self.last_schedule = datetime.now()
 
     def transmit_with_config(self, msg):
-        threads = []
         for i in range(self.configuration.retransmit):
-            t = threading.Thread(target=self.radio.transmit, args=[msg])
-            threads.append(t)
-
-        for t in threads:
-            t.start()
+            self.radio.transmit(msg)
 
     def send_check_signal(self, remote_id, blind_id, channel):
         message = self.elero.construct_msg(channel=deserialize_str_to_int(channel),
@@ -92,7 +87,7 @@ class RadioService:
                             self.on_status_update_cb(channel=chl, source=src, destinations=dests, rssi=rssi,
                                                      blind_state=blind_state)
 
-                except Exception as e:
+                except RuntimeError as e:
                     print(f"Exception during radio message decode: {e}")
             time.sleep(0.005)
             self.scheduled_tasks()

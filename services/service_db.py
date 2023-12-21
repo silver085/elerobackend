@@ -13,21 +13,22 @@ class DBService:
         self.meta = MetaData()
         self.meta.create_all(self.engine)
         self.connection = self.engine.connect()
+        self.session = Session(self.engine)
 
     def execute_statement(self, statement):
-        return self.connection.execute(statement)
+        return self.session.execute(statement)
 
     def execute_insert(self, statement):
         try:
-            result = self.connection.execute(statement=statement)
-            self.connection.commit()
+            result = self.session.execute(statement=statement)
+            self.session.commit()
             return result.inserted_primary_key
         except RuntimeError as e:
             print(f"Error during execute_insert: {e}")
 
     def execute_update(self, statement):
         try:
-            result = self.connection.execute(statement=statement)
-            self.connection.commit()
+            result = self.session.execute(statement=statement)
+            self.session.commit()
         except RuntimeError as e:
             print(f"Error during execute_insert: {e}")
