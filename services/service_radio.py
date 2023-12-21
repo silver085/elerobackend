@@ -1,5 +1,6 @@
 import threading
 import time
+from datetime import datetime
 
 from controllers.config_controller import ConfigController
 from drivers.cc1101 import CC1101
@@ -12,6 +13,7 @@ from utils.printutils import hex_int_to_str, hex_array_to_str, hex_n_array_to_st
 class RadioService:
     configuration: Config
     radio: CC1101
+    schedule: list
 
     def __init__(self, config_controller: ConfigController):
         self.config_controller = config_controller
@@ -27,6 +29,8 @@ class RadioService:
         self.elero = EleroProtocol()
         self.on_stop_button_cb = None
         self.on_status_update_cb = None
+        self.schedule = []
+        self.last_schedule = datetime.now()
 
     def transmit_with_config(self, msg):
         threads = []
@@ -52,6 +56,15 @@ class RadioService:
     def stop_looping(self):
         if self.radio_task:
             self.radio_task.join()
+
+    def scheduled_tasks(self):
+        diff = datetime.now() - self.last_schedule
+
+        if diff.seconds >= 20:
+            self.last_schedule = datetime.now()
+            for task in self.schedule:
+                print(f"Running task: {task[0]}")
+                task[1]()
 
     def loop_radio(self):
         print("Radio initialized.")
@@ -82,3 +95,4 @@ class RadioService:
                 except Exception as e:
                     print(f"Exception during radio message decode: {e}")
             time.sleep(0.005)
+            self.scheduled_tasks()

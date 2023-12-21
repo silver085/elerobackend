@@ -33,7 +33,8 @@ radio_service.on_status_update_cb = blind_controller.on_status_update_listener
 blinds_check = BlindsCheckerSchedule()
 blinds_check.blind_controller = blind_controller
 blinds_check.radio_service = radio_service
-blinds_check.start_looping()
+
+radio_service.schedule.append(["Ping radio", blinds_check.ping_blinds])
 
 try:
     radio_service.start_looping()
