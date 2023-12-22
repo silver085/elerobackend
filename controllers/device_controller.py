@@ -1,6 +1,7 @@
 import fcntl
+import socket
 import struct
-from socket import socket
+
 
 from fastapi import FastAPI, APIRouter
 from fastapi.encoders import jsonable_encoder
