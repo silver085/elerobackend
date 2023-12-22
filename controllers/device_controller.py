@@ -16,7 +16,7 @@ class DeviceController:
         self.router.add_api_route(f"/{self.name}/ping", self.ping, methods=["GET"])
         app.include_router(self.router)
 
-    def getHwAddr(ifname):
+    def getHwAddr(self, ifname):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         info = fcntl.ioctl(s.fileno(), 0x8927, struct.pack('256s', bytes(ifname, 'utf-8')[:15]))
         return ':'.join('%02x' % b for b in info[18:24])
