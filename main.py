@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from controllers.blind_controller import BlindController
 from controllers.config_controller import ConfigController
+from controllers.device_controller import DeviceController
 from controllers.user_controller import UserController
 from repositories.blind_repo import BlindsRepository
 from repositories.config_repo import ConfigRepository
@@ -35,6 +36,8 @@ blinds_check.blind_controller = blind_controller
 blinds_check.radio_service = radio_service
 
 radio_service.schedule.append(["Ping radio", blinds_check.ping_blinds])
+
+device_controller = DeviceController(app=app)
 
 try:
     radio_service.start_looping()
