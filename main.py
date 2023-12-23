@@ -27,6 +27,7 @@ radio_service = RadioService(config_controller=config_controller)
 
 blind_repo = BlindsRepository(db_service=db_service)
 blind_controller = BlindController(db_service=db_service, blind_repo=blind_repo, app=app)
+blind_controller.user_controller = user_controller
 radio_service.on_stop_button_cb = blind_controller.on_stop_button_listener
 radio_service.on_status_update_cb = blind_controller.on_status_update_listener
 

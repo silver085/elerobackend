@@ -1,10 +1,12 @@
 from datetime import datetime
+from typing import Union
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Header, HTTPException
 from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
 
+from controllers.user_controller import UserController
 from models.blind import Blind, BlindStates
 from repositories.blind_repo import BlindsRepository
 from utils.printutils import hex_array_to_str, hex_int_to_str, hex_n_array_to_str
@@ -12,6 +14,7 @@ from utils.printutils import hex_array_to_str, hex_int_to_str, hex_n_array_to_st
 
 class BlindController:
     blind_repo: BlindsRepository
+    user_controller: UserController
 
     def __init__(self, db_service, blind_repo, app: FastAPI):
         self.name = "blinds"
@@ -22,6 +25,7 @@ class BlindController:
         self.router.add_api_route(f"/{self.name}/indiscovery", self.is_in_discovery, methods=["GET"])
         self.router.add_api_route(f"/{self.name}/indiscovery", self.toggle_discovery, methods=["PUT"])
         self.router.add_api_route(f"/{self.name}/stopbutton", self.add_blind_in_discovery, methods=["POST"])
+        self.router.add_api_route(f"/{self.name}/getblinds", self.get_blinds, methods=["GET"])
         app.include_router(self.router)
 
     def is_in_discovery(self):
@@ -97,10 +101,25 @@ class BlindController:
         print(
             f"Blind status update: chl: {hex_int_to_str(channel)} - src: {hex_array_to_str(source)} - dests: {hex_n_array_to_str(destinations)} - rssi: {rssi} - state: {blind_state}")
 
-        self.blind_repo.set_status_by_blind_id(blind_id=hex_array_to_str(source), channel=hex_int_to_str(channel), rssi=rssi, state= blind_state.upper())
+        self.blind_repo.set_status_by_blind_id(blind_id=hex_array_to_str(source), channel=hex_int_to_str(channel),
+                                               rssi=rssi, state=blind_state.upper())
 
     def get_all_blinds(self):
         return self.blind_repo.get_blinds()
+
+    def get_blinds(self, WWW_Authenticate: Union[str, None] = Header(default=None)):
+        if self.user_controller.is_user_admin(WWW_Authenticate):
+            blinds_list = self.get_all_blinds()
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=jsonable_encoder({"status": "success", "blinds": blinds_list}),
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not enough permissions to perform requested action",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
     def put_blind_offline(self, blind_id):
         self.blind_repo.set_blind_offline(blind_id=blind_id)
