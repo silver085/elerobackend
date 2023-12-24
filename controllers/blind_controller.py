@@ -9,6 +9,7 @@ from starlette.responses import JSONResponse
 from controllers.user_controller import UserController
 from models.blind import Blind, BlindStates
 from repositories.blind_repo import BlindsRepository
+from utils.deserialiser import map_to_blindJson
 from utils.printutils import hex_array_to_str, hex_int_to_str, hex_n_array_to_str
 
 
@@ -25,6 +26,7 @@ class BlindController:
         self.router.add_api_route(f"/{self.name}/indiscovery", self.is_in_discovery, methods=["GET"])
         self.router.add_api_route(f"/{self.name}/indiscovery", self.toggle_discovery, methods=["PUT"])
         self.router.add_api_route(f"/{self.name}/stopbutton", self.add_blind_in_discovery, methods=["POST"])
+        self.router.add_api_route(f"/{self.name}/getblinds" + "/{blind}", self.get_blinds, methods=["GET"])
         self.router.add_api_route(f"/{self.name}/getblinds", self.get_blinds, methods=["GET"])
         app.include_router(self.router)
 
@@ -107,18 +109,33 @@ class BlindController:
     def get_all_blinds(self):
         return self.blind_repo.get_blinds()
 
-    def get_blinds(self, WWW_Authenticate: Union[str, None] = Header(default=None)):
-        if self.user_controller.is_user_admin(WWW_Authenticate):
-            blinds_list = self.get_all_blinds()
+    async def get_blinds(self, blind: Union[str, None] = None,
+                         WWW_Authenticate: Union[str, None] = Header(default=None)):
+        if not self.user_controller.is_user_admin(token=WWW_Authenticate):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User cannot perform this operation",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if blind is None:
+            blinds_result = self.get_all_blinds()
+            blinds_list = []
+            for blind in blinds_result:
+                blinds_list.append(map_to_blindJson(blind))
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
                 content=jsonable_encoder({"status": "success", "blinds": blinds_list}),
             )
         else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not enough permissions to perform requested action",
-                headers={"WWW-Authenticate": "Bearer"},
+            if not self.blind_repo.blind_id_exists(blind_id=blind):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Blind not found",
+                )
+            blind = map_to_blindJson(self.blind_repo.find_blind_by_id(blind_id=blind))
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=jsonable_encoder({"status": "success", "blind": blind}),
             )
 
     def put_blind_offline(self, blind_id):
