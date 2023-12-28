@@ -32,8 +32,10 @@ class UsersRepository:
 
     def get_user_record(self, email):
         user = self.get_user_by_email(email=email)
-        if user.rowcount == 0: return None
-        return user.first()
+        if user:
+            if user.rowcount == 0: return None
+            return user.first()
+        return None
 
     def get_user_by_email(self, email):
         return self.dbservice.execute_statement(self.table.select().where(self.table.c.email == email))
