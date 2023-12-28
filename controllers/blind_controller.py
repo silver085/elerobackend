@@ -114,10 +114,10 @@ class BlindController:
             f"Blind status update: chl: {hex_int_to_str(channel)} - src: {hex_array_to_str(source)} - dests: {hex_n_array_to_str(destinations)} - rssi: {rssi} - state: {blind_state}")
         blind_form_db:Blind = self.blind_repo.find_blind_by_id(blind_id=hex_array_to_str(source))
         print(f"STATE FROM DB IS: {blind_form_db.state} / BLIND STATE RCV: {blind_state}")
-        if blind_form_db.state == "IN_DISCOVERY" and blind_state == "MOVING_DOWN":
+        if blind_form_db.state == "IN_DISCOVERY" and blind_state.upper() == "MOVINGDOWN":
             print("Updating time_to_close_stop")
             self.blind_repo.update_time_to_close_stop(blind_id=blind_form_db.id, date=datetime.utcnow())
-        if blind_form_db.state == "IN_DISCOVERY" and blind_state == "BOTTOM":
+        if blind_form_db.state == "IN_DISCOVERY" and blind_state.upper() == "BOTTOM":
             print("Update time_to_close in time")
             now = datetime.utcnow()
             was = blind_form_db.time_to_close_start
@@ -126,6 +126,10 @@ class BlindController:
             self.blind_repo.update_time_to_close_stop(blind_id=blind_form_db.id, date=datetime.utcnow())
             self.blind_repo.update_time_to_close(blind_id=blind_form_db.id, time=diff.seconds)
             self.radio_service.send_command(remote_id=blind_form_db.remote_id, blind_id=blind_form_db.id, channel=blind_form_db.channel, command="Up")
+        if blind_form_db.state == "IN_DISCOVERY" and blind_state.upper() == "TOP":
+            print("Updating time_to_close_start")
+            self.blind_repo.update_time_to_close_start(blind_id=blind_form_db.id, date=datetime.utcnow())
+            self.radio_service.send_command(remote_id=blind_form_db.remote_id, blind_id=blind_form_db.id, channel=blind_form_db.channel, command="Down")
         else:
             print(f"Updating to {blind_state.upper()}")
             self.blind_repo.set_status_by_blind_id(blind_id=hex_array_to_str(source), channel=hex_int_to_str(channel),
