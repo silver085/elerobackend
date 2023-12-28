@@ -66,7 +66,7 @@ class BlindController:
                     content=jsonable_encoder({"blind_id": blind.id, "ready": True}),
                 )
 
-            if blind_from_db.discovery_stop <= 10:
+            if blind_from_db.discovery_stop < 10:
                 self.blind_repo.update_stop_count(blind_id=blind_from_db.id, count=blind_from_db.discovery_stop + 1)
                 print(f"Blind id: {blind.id} - stopcount: {blind_from_db.discovery_stop + 1}")
                 return JSONResponse(
@@ -76,18 +76,11 @@ class BlindController:
                 )
 
             else:
-                if blind_from_db.time_to_close == 0:
-                    if blind_from_db.time_to_close_start is None:
-                        self.radio_service.send_command(remote_id=blind_from_db.remote_id, blind_id=blind_from_db.id, channel=blind_from_db.channel, command="Down")
-                        self.blind_repo.update_time_to_close_start(datetime.utcnow())
-
-                else:
-                    self.blind_repo.set_blind_not_discovery(blind_from_db.id)
-                    return JSONResponse(
-                        status_code=status.HTTP_200_OK,
-                        content=jsonable_encoder({"blind_id": blind.id, "ready": True}),
-                    )
-
+                self.blind_repo.set_blind_not_discovery(blind_from_db.id)
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content=jsonable_encoder({"blind_id": blind.id, "ready": True}),
+                )
 
     def on_stop_button_listener(self, channel, source, destinations):
         if self.in_discovery:
@@ -112,31 +105,9 @@ class BlindController:
     def on_status_update_listener(self, channel, source, destinations, rssi, blind_state):
         print(
             f"Blind status update: chl: {hex_int_to_str(channel)} - src: {hex_array_to_str(source)} - dests: {hex_n_array_to_str(destinations)} - rssi: {rssi} - state: {blind_state}")
-        blind_form_db:Blind = self.blind_repo.find_blind_by_id(blind_id=hex_array_to_str(source))
-        if blind_form_db is None: return
-        print(f"STATE FROM DB IS: {blind_form_db.state} / BLIND STATE RCV: {blind_state}")
-        if blind_form_db.discovery_stop >= 10:
-            if blind_form_db.state == "IN_DISCOVERY" and blind_state.upper() == "MOVINGDOWN":
-                print("Updating time_to_close_stop")
-                self.blind_repo.update_time_to_close_stop(blind_id=blind_form_db.id, date=datetime.utcnow())
-            if blind_form_db.state == "IN_DISCOVERY" and blind_state.upper() == "BOTTOM":
-                print("Update time_to_close in time")
-                now = datetime.utcnow()
-                was = blind_form_db.time_to_close_start
-                diff = now - was
-                print(f"Time to close: {diff.seconds} seconds")
-                self.blind_repo.update_time_to_close_stop(blind_id=blind_form_db.id, date=datetime.utcnow())
-                self.blind_repo.update_time_to_close(blind_id=blind_form_db.id, time=diff.seconds)
-                self.blind_repo.update_not_discovery(blind_id=blind_form_db.id, state="MOVINGUP")
-                self.radio_service.send_command(remote_id=blind_form_db.remote_id, blind_id=blind_form_db.id, channel=blind_form_db.channel, command="Up")
-            if blind_form_db.state == "IN_DISCOVERY" and blind_state.upper() == "TOP":
-                print("Updating time_to_close_start")
-                self.blind_repo.update_time_to_close_start(blind_id=blind_form_db.id, date=datetime.utcnow())
-                self.radio_service.send_command(remote_id=blind_form_db.remote_id, blind_id=blind_form_db.id, channel=blind_form_db.channel, command="Down")
-            else:
-                print(f"Updating to {blind_state.upper()}")
-                self.blind_repo.set_status_by_blind_id(blind_id=hex_array_to_str(source), channel=hex_int_to_str(channel),
-                                                   rssi=rssi, state=blind_state.upper())
+
+        self.blind_repo.set_status_by_blind_id(blind_id=hex_array_to_str(source), channel=hex_int_to_str(channel),
+                                               rssi=rssi, state=blind_state.upper())
 
     def get_all_blinds(self):
         return self.blind_repo.get_blinds()
