@@ -30,7 +30,7 @@ blind_controller = BlindController(db_service=db_service, blind_repo=blind_repo,
 blind_controller.user_controller = user_controller
 radio_service.on_stop_button_cb = blind_controller.on_stop_button_listener
 radio_service.on_status_update_cb = blind_controller.on_status_update_listener
-
+blind_controller.radio_service = radio_service
 
 blinds_check = BlindsCheckerSchedule()
 blinds_check.blind_controller = blind_controller

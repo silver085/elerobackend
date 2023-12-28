@@ -42,6 +42,12 @@ class RadioService:
                                            blind_addr=deserialize_str_to_list(blind_id), command="Check")
         self.transmit_with_config(message)
 
+    def send_command(self, remote_id, blind_id, channel, command):
+        message = self.elero.construct_msg(channel=deserialize_str_to_int(channel),
+                                           remote_addr=deserialize_str_to_list(remote_id),
+                                           blind_addr=deserialize_str_to_list(blind_id), command=command)
+        self.transmit_with_config(message)
+
     def start_looping(self):
         if self.radio:
             self.radio_task.start()

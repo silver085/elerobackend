@@ -9,6 +9,7 @@ from starlette.responses import JSONResponse
 from controllers.user_controller import UserController
 from models.blind import Blind, BlindStates
 from repositories.blind_repo import BlindsRepository
+from services.service_radio import RadioService
 from utils.deserialiser import map_to_blindJson
 from utils.printutils import hex_array_to_str, hex_int_to_str, hex_n_array_to_str
 
@@ -16,6 +17,7 @@ from utils.printutils import hex_array_to_str, hex_int_to_str, hex_n_array_to_st
 class BlindController:
     blind_repo: BlindsRepository
     user_controller: UserController
+    radio_service: RadioService
 
     def __init__(self, db_service, blind_repo, app: FastAPI):
         self.name = "blinds"
@@ -28,6 +30,7 @@ class BlindController:
         self.router.add_api_route(f"/{self.name}/stopbutton", self.add_blind_in_discovery, methods=["POST"])
         self.router.add_api_route(f"/{self.name}/getblinds" + "/{blind}", self.get_blinds, methods=["GET"])
         self.router.add_api_route(f"/{self.name}/getblinds", self.get_blinds, methods=["GET"])
+        self.router.add_api_route(f"/{self.name}/action" + "/{blind_id}/{action}", self.get_blinds, methods=["PUT"])
         app.include_router(self.router)
 
     def is_in_discovery(self):
@@ -108,6 +111,67 @@ class BlindController:
 
     def get_all_blinds(self):
         return self.blind_repo.get_blinds()
+
+    async def set_action(self, blind_id: Union[str, None] = None, action: Union[str, None] = None):
+        if blind_id is None or action is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Specify a blind and action",
+            )
+
+        if not self.blind_exists(blind_id=blind_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Blind doesn't exist",
+            )
+
+        blind = self.blind_repo.find_blind_by_id(blind_id=blind_id)
+
+        if action == "open": return self.open_blind(blind=blind)
+        if action == "close": return self.close_blind(blind=blind)
+        if action == "stop": return self.stop_blind(blind=blind)
+        if action == "intermediate": return self.intermediate_blind(blind=blind)
+        if action == "tilt": return self.tilt_blind(blind=blind)
+
+    async def open_blind(self, blind):
+        self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
+                                        command="Up")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder({"blind_id": blind.id, "action": "open"}),
+        )
+
+    async def close_blind(self, blind):
+        self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
+                                        command="Down")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder({"blind_id": blind.id, "action": "close"}),
+        )
+
+    async def stop_blind(self, blind):
+        self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
+                                        command="Stop")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder({"blind_id": blind.id, "action": "stop"}),
+        )
+
+    async def intermediate_blind(self, blind):
+        self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
+                                        command="Int")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder({"blind_id": blind.id, "action": "intermediate"}),
+        )
+
+    async def tilt_blind(self, blind):
+        self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
+                                        command="Tilt")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder({"blind_id": blind.id, "action": "tilt"}),
+        )
 
     async def get_blinds(self, blind: Union[str, None] = None,
                          WWW_Authenticate: Union[str, None] = Header(default=None)):
