@@ -30,7 +30,7 @@ class BlindController:
         self.router.add_api_route(f"/{self.name}/stopbutton", self.add_blind_in_discovery, methods=["POST"])
         self.router.add_api_route(f"/{self.name}/getblinds" + "/{blind}", self.get_blinds, methods=["GET"])
         self.router.add_api_route(f"/{self.name}/getblinds", self.get_blinds, methods=["GET"])
-        self.router.add_api_route(f"/{self.name}/action" + "/{blind_id}/{action}", self.get_blinds, methods=["PUT"])
+        self.router.add_api_route(f"/{self.name}/action" + "/{blind_id}/{action}", self.set_action, methods=["PUT"])
         app.include_router(self.router)
 
     def is_in_discovery(self):
