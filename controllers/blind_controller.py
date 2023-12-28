@@ -112,7 +112,7 @@ class BlindController:
     def get_all_blinds(self):
         return self.blind_repo.get_blinds()
 
-    async def set_action(self, blind_id: Union[str, None] = None, action: Union[str, None] = None):
+    def set_action(self, blind_id: Union[str, None] = None, action: Union[str, None] = None):
         if blind_id is None or action is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -133,7 +133,7 @@ class BlindController:
         if action == "intermediate": return self.intermediate_blind(blind=blind)
         if action == "tilt": return self.tilt_blind(blind=blind)
 
-    async def open_blind(self, blind):
+    def open_blind(self, blind):
         self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
                                         command="Up")
         return JSONResponse(
@@ -141,7 +141,7 @@ class BlindController:
             content=jsonable_encoder({"blind_id": blind.id, "action": "open"}),
         )
 
-    async def close_blind(self, blind):
+    def close_blind(self, blind):
         self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
                                         command="Down")
         return JSONResponse(
@@ -149,7 +149,7 @@ class BlindController:
             content=jsonable_encoder({"blind_id": blind.id, "action": "close"}),
         )
 
-    async def stop_blind(self, blind):
+    def stop_blind(self, blind):
         self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
                                         command="Stop")
         return JSONResponse(
@@ -157,7 +157,7 @@ class BlindController:
             content=jsonable_encoder({"blind_id": blind.id, "action": "stop"}),
         )
 
-    async def intermediate_blind(self, blind):
+    def intermediate_blind(self, blind):
         self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
                                         command="Int")
         return JSONResponse(
@@ -165,7 +165,7 @@ class BlindController:
             content=jsonable_encoder({"blind_id": blind.id, "action": "intermediate"}),
         )
 
-    async def tilt_blind(self, blind):
+    def tilt_blind(self, blind):
         self.radio_service.send_command(remote_id=blind.remote_id, blind_id=blind.id, channel=blind.channel,
                                         command="Tilt")
         return JSONResponse(
@@ -173,7 +173,7 @@ class BlindController:
             content=jsonable_encoder({"blind_id": blind.id, "action": "tilt"}),
         )
 
-    async def get_blinds(self, blind: Union[str, None] = None,
+    def get_blinds(self, blind: Union[str, None] = None,
                          WWW_Authenticate: Union[str, None] = Header(default=None)):
         if not self.user_controller.is_user_admin(token=WWW_Authenticate):
             raise HTTPException(
