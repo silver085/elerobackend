@@ -21,7 +21,10 @@ class BlindsRepository:
             Column('is_in_discovery', Boolean, default=0),
             Column('discovery_stop', Integer, default=0),
             Column('last_stop_date', DateTime),
-            Column('last_ping', DateTime)
+            Column('last_ping', DateTime),
+            Column('time_to_close_start', DateTime),
+            Column('time_to_close_stop', DateTime),
+            Column('time_to_close', Integer, default=0),
         )
         self.table.create(db_service.connection, checkfirst=True)
 
@@ -36,6 +39,30 @@ class BlindsRepository:
     def blind_id_exists(self, blind_id):
         statement = self.table.select().where(self.table.c.id == blind_id)
         return self.db_service.execute_statement(statement).rowcount != 0
+
+    def update_time_to_close_start(self, blind_id, date):
+        statement = self.table.update().values(
+            time_to_close_start=date
+        ).where(self.table.c.id == blind_id)
+        self.db_service.execute_update(statement)
+
+    def update_time_to_close_stop(self, blind_id, date):
+        statement = self.table.update().values(
+            time_to_close_stop=date
+        ).where(self.table.c.id == blind_id)
+        self.db_service.execute_update(statement)
+
+    def update_time_to_close(self, blind_id, time):
+        statement = self.table.update().values(
+            time_to_close=time
+        ).where(self.table.c.id == blind_id)
+        self.db_service.execute_update(statement)
+
+    def update_not_discovery(self, blind_id, state):
+        statement = self.table.update().values(
+            state=state
+        ).where(self.table.c.id == blind_id)
+        self.db_service.execute_update(statement)
 
     def insert_blind(self, blind: Blind):
         statement = self.table.insert().values(
