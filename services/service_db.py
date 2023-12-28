@@ -25,6 +25,7 @@ class DBService:
             self.session_scope()
             return res
         except PendingRollbackError:
+            print(f"Failed on SQL: {statement}")
             self.session.rollback()
 
     def execute_insert(self, statement):
