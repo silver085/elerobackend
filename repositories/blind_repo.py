@@ -58,6 +58,12 @@ class BlindsRepository:
         ).where(self.table.c.id == blind_id)
         self.db_service.execute_update(statement)
 
+    def update_not_discovery(self, blind_id, state):
+        statement = self.table.update().values(
+            state=state
+        ).where(self.table.c.id == blind_id)
+        self.db_service.execute_update(statement)
+
     def insert_blind(self, blind: Blind):
         statement = self.table.insert().values(
             id=blind.id,
