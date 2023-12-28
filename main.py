@@ -1,7 +1,6 @@
 import uvicorn as uvicorn
 from fastapi import FastAPI
-
-
+from sqlalchemy.orm import Session
 
 from controllers.blind_controller import BlindController
 from controllers.config_controller import ConfigController
@@ -21,7 +20,8 @@ user_repo = UsersRepository(dbservice=db_service)
 user_controller = UserController(db_service=db_service, user_repo=user_repo, app=app)
 
 config_repo = ConfigRepository(db_service=db_service)
-config_controller = ConfigController(db_service=db_service, config_repo=config_repo, user_controller=user_controller, app=app)
+config_controller = ConfigController(db_service=db_service, config_repo=config_repo, user_controller=user_controller,
+                                     app=app)
 
 radio_service = RadioService(config_controller=config_controller)
 
@@ -39,6 +39,10 @@ blinds_check.radio_service = radio_service
 radio_service.schedule.append(["Ping radio", blinds_check.ping_blinds])
 
 device_controller = DeviceController(app=app)
+
+
+
+
 
 try:
     radio_service.start_looping()
