@@ -113,6 +113,7 @@ class BlindController:
         print(
             f"Blind status update: chl: {hex_int_to_str(channel)} - src: {hex_array_to_str(source)} - dests: {hex_n_array_to_str(destinations)} - rssi: {rssi} - state: {blind_state}")
         blind_form_db:Blind = self.blind_repo.find_blind_by_id(blind_id=hex_array_to_str(source))
+        if blind_form_db is None: return
         print(f"STATE FROM DB IS: {blind_form_db.state} / BLIND STATE RCV: {blind_state}")
         if blind_form_db.state == "IN_DISCOVERY" and blind_state.upper() == "MOVINGDOWN":
             print("Updating time_to_close_stop")
