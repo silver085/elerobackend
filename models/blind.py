@@ -17,6 +17,9 @@ class Blind(BaseModel):
     discovery_stop: int = Field(0)
     last_stop_date: datetime = Field(None)
     last_ping: datetime = Field(None)
+    time_to_close_start: datetime = Field(None)
+    time_to_close_stop: datetime = Field(None)
+    time_to_close:int = Field(None)
 
 
 class BlindStates:
