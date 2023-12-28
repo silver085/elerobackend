@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import Session, sessionmaker
 
 from config.db import db_config
@@ -18,10 +19,13 @@ class DBService:
         self.session = Session(self.engine)
 
     def execute_statement(self, statement):
-        self.session_scope()
-        res = self.session.execute(statement)
-        self.session_scope()
-        return res
+        try:
+            self.session_scope()
+            res = self.session.execute(statement)
+            self.session_scope()
+            return res
+        except PendingRollbackError:
+            self.session.rollback()
 
     def execute_insert(self, statement):
         try:
