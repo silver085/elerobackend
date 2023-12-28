@@ -21,11 +21,14 @@ class BlindsCheckerSchedule:
 
     def ping_blinds(self):
         print("Check blind task")
-        blinds_rows = self.blind_controller.get_all_blinds()
-        for blind in blinds_rows:
-            if not blind.is_in_discovery:
-                print(f"Checking blind {blind.id}")
+        try:
+            blinds_rows = self.blind_controller.get_all_blinds()
+            for blind in blinds_rows:
+                if not blind.is_in_discovery:
+                    print(f"Checking blind {blind.id}")
 
-                self.check_blind_offline(blind)
-                self.radio_service.send_check_signal(channel=blind.channel, remote_id=blind.remote_id,
-                                                     blind_id=blind.id)
+                    self.check_blind_offline(blind)
+                    self.radio_service.send_check_signal(channel=blind.channel, remote_id=blind.remote_id,
+                                                         blind_id=blind.id)
+        except RuntimeError as e:
+            print(f"An exception was raised in blinds_check: {e}")
