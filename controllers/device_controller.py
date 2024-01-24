@@ -6,12 +6,12 @@ from fastapi import FastAPI, APIRouter
 from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
-import RPi.GPIO as GPIO
-import dht11
+from drivers.dht11 import Hygrometer
 
 
 class DeviceController:
     def __init__(self, app: FastAPI):
+        self.hg = Hygrometer()
         self.name = "device"
         self.router = APIRouter()
         self.router.add_api_route(f"/{self.name}/ping", self.ping, methods=["GET"])
@@ -31,22 +31,16 @@ class DeviceController:
         )
 
     def hygrometer(self):
-        GPIO.setup(17, GPIO.IN)
-
-        instance = dht11.DHT11(pin=17)
-        result = instance.read()
-        if result.is_valid():
-            print("Temperature: %-3.1f C" % result.temperature)
-            print("Humidity: %-3.1f %%" % result.humidity)
-            temp = "Temperature: %-3.1f" % result.temperature
-            hum = "Humidity: %-3.1f" % result.humidity
+        hm, t = self.hg.read()
+        if hm is not None and t is not None:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
                 content=jsonable_encoder(
-                    {"result": "Success", "temperature" : {"value" : temp, "unit" : "°C"}, "humidity" : {"value" : hum, "unit": "%%"}})
+                    {"result": "Success", "temperature": {"value": "{0:0.1f}".format(t), "unit": "°C"},
+                     "humidity": {"value": "{1:0.1f}".format(hm), "unit": "%%"}})
             )
         else:
-            print("Error: %d" % result.error_code)
+            print("Error: reading from sensor")
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content=jsonable_encoder({"result": "error", "message": "Unable to read valid results from sensor."})
