@@ -31,7 +31,7 @@ class DeviceController:
         )
 
     def hygrometer(self):
-        instance = dht11.DHT11(pin=14)
+        instance = dht11.DHT11(pin=17)
         result = instance.read()
         if result.is_valid():
             print("Temperature: %-3.1f C" % result.temperature)
