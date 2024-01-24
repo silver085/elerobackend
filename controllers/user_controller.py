@@ -7,8 +7,10 @@ from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse
 
+from DTOs.UserData import UserDTO, PassDataDTO
 from custom_validators.user_validators import validate_user_create
-from models.user import User, PassData
+from models.user import User
+
 from utils.encryption import encrypt, ENC_SALT
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
@@ -36,7 +38,7 @@ class UserController:
         self.router = APIRouter()
         self.router.add_api_route(f"/{self.name}/new", self.create_user, methods=["POST"])
         self.router.add_api_route(f"/{self.name}/token", self.login, methods=["POST"], response_model=Token)
-        self.router.add_api_route(f"/{self.name}/me", self.read_users_me, methods=["GET"], response_model=User)
+        self.router.add_api_route(f"/{self.name}/me", self.read_users_me, methods=["GET"], response_model=UserDTO)
         self.router.add_api_route(f"/{self.name}/delete/" + "{id}", self.delete_user, methods=["DELETE"])
         self.router.add_api_route(f"/{self.name}/updateadmin/" + "{id}", self.update_admin, methods=["PATCH"])
         self.router.add_api_route(f"/{self.name}/updatepassword/", self.update_password, methods=["POST"])
@@ -45,10 +47,11 @@ class UserController:
         self.user_repo = user_repo
         app.include_router(self.router)
 
-    async def create_user(self, user: User):
+    async def create_user(self, user: UserDTO):
         try:
             print(f"Request body: {user}")
             result, errors = validate_user_create(user)
+
             if result:
                 return self.user_repo.add_new_user(user)
             else:
@@ -169,24 +172,16 @@ class UserController:
 
     def make_admin(self, id):
         user = self.user_repo.get_user_by_id(id=id)
-        if user.rowcount == 0:
+        if not User:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        user_data = user.first()
+        user.is_admin = not user.is_admin
+        self.user_repo.update_user(user)
 
-        return self.user_repo.update_user(user={
-            "id": user_data.id,
-            "username": user_data.username,
-            "password": user_data.password,
-            "email": user_data.email,
-            "created_at": user_data.created_at,
-            "is_admin": not user_data.is_admin
-        })
-
-    async def update_password(self, pass_data: PassData, WWW_Authenticate: Union[str, None] = Header(default=None)):
+    async def update_password(self, pass_data: PassDataDTO, WWW_Authenticate: Union[str, None] = Header(default=None)):
         user = self.get_current_user(token=WWW_Authenticate)
 
         if self.verify_password(pass_data.old_password, user.password):

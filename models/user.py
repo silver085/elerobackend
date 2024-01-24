@@ -1,20 +1,21 @@
-from typing import Union
-from datetime import datetime
-
-from pydantic import BaseModel
-
-
-class User(BaseModel):
-    id: Union[int, None] = None
-    username: Union[str, None] = None
-    password: Union[str, None] = None
-    repeat_password: Union[str, None] = None
-    email: Union[str, None] = None
-    created_at: Union[datetime, None] = None
-    is_admin: Union[bool, None] = None
+from sqlalchemy import Integer, String, DateTime, Boolean
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
 
 
-class PassData(BaseModel):
-    old_password: str
-    password: str
-    repeat_password: str
+class Base(DeclarativeBase):
+    pass
+
+
+class User(Base):
+    __tablename__ = "user"
+    id = mapped_column(Integer, primary_key=True)
+    username = mapped_column(String)
+    password = mapped_column(String)
+    email = mapped_column(String)
+    created_at = mapped_column(DateTime)
+    is_admin = mapped_column(Boolean)
+    token_expires = mapped_column(String)
+
+

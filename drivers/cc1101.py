@@ -36,7 +36,8 @@ class CC1101:
             self.readBuf = self.readBufRpi
             self.pinVal = self.pinValRpi
             self.GPIO = GPIO
-
+            GPIO.setup(4, GPIO.OUT)
+            GPIO.output(4, GPIO.LOW)
         self.pktRec = False
 
         self.writeCmd(0x30)
@@ -93,6 +94,7 @@ class CC1101:
         self.is_initialised = True
 
     def transmit(self, msg):
+        self.GPIO.output(4, self.GPIO.HIGH)
         time.sleep(0.010)
         if not self.is_initialised:
             d_msg = " ".join(list(map(lambda x: str(hex(x)), msg)))
@@ -118,7 +120,8 @@ class CC1101:
         start = time.time_ns()
         while (self.readReg(0xF5) != 0x13) and ((time.time_ns() - start) < 50000000):
             time.sleep(0.005)
-
+        time.sleep(0.3)
+        self.GPIO.output(4, self.GPIO.LOW)
         print("sent: ", ''.join('{:02X}:'.format(a) for a in msg), self.readReg(0xF5))
 
     def checkBuffer(self):
