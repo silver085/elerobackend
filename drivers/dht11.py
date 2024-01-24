@@ -7,7 +7,7 @@ class Hygrometer:
 
     def __init__(self, pin=17):
         self.pin = pin
-        self.sensor = Adafruit_DHT.DHT11
+        self.sensor = Adafruit_DHT.DHT22
 
     def read(self):
         return Adafruit_DHT.read_retry(self.sensor, self.pin)
