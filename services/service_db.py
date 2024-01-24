@@ -31,6 +31,7 @@ class DBService:
     def execute_insert(self, statement):
         try:
             result = self.session.execute(statement=statement)
+            self.session.commit()
             self.session_scope()
             return result.inserted_primary_key
         except RuntimeError as e:
@@ -40,6 +41,7 @@ class DBService:
     def execute_update(self, statement):
         try:
             result = self.session.execute(statement=statement)
+            self.session.commit()
             self.session_scope()
             return True
         except RuntimeError as e:
