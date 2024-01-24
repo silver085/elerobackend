@@ -31,6 +31,8 @@ class DeviceController:
         )
 
     def hygrometer(self):
+        GPIO.setup(17, GPIO.IN)
+
         instance = dht11.DHT11(pin=17)
         result = instance.read()
         if result.is_valid():
