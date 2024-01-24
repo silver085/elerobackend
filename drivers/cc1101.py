@@ -128,6 +128,7 @@ class CC1101:
         if not self.is_initialised: return None
         data = None
         if (self.pktRec):
+            self.GPIO.output(4, self.GPIO.HIGH)
             time.sleep(0.00002)
             self.pktRec = False
             bytes_in_fifo = self.readReg(0xFB)
@@ -142,6 +143,7 @@ class CC1101:
             self.writeCmd(0x3A)
             self.writeCmd(0x3B)
             self.writeCmd(0x34)
+            self.GPIO.output(4, self.GPIO.LOW)
         return (data)
 
     def writeCmdRpi(self, cmd):
